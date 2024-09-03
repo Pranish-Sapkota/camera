@@ -1,0 +1,112 @@
+**index.html**
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera App</title>
+    <style>
+        #camera-view {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #camera-stream {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #camera-icon {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        #click-box {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #save-option {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="camera-view">
+        <video id="camera-stream" autoplay playsinline></video>
+        <i id="camera-icon" class="fa fa-camera"></i>
+        <button id="click-box">Click</button>
+        <button id="save-option" style="display: none;">Save</button>
+    </div>
+    <script>
+        let cameraStream;
+        let canvas;
+
+        // Request access to the camera
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+            .then(stream => {
+                cameraStream = stream;
+                // Set the video stream to the video element
+                document.getElementById('camera-stream').srcObject = stream;
+            })
+            .catch(error => {
+                console.error('Error accessing camera:', error);
+            });
+
+        // Add event listener to camera icon
+        document.getElementById('camera-icon').addEventListener('click', () => {
+            document.getElementById('camera-view').style.display = 'block';
+        });
+
+        // Add event listener to click box
+        document.getElementById('click-box').addEventListener('click', () => {
+            // Create a canvas element to capture the photo
+            canvas = document.createElement('canvas');
+            canvas.width = document.getElementById('camera-stream').videoWidth;
+            canvas.height = document.getElementById('camera-stream').videoHeight;
+
+            // Draw the video frame to the canvas
+            canvas.getContext('2d').drawImage(document.getElementById('camera-stream'), 0, 0, canvas.width, canvas.height);
+
+            // Show the save option
+            document.getElementById('save-option').style.display = 'block';
+        });
+
+        // Add event listener to save option
+        document.getElementById('save-option').addEventListener('click', () => {
+            // Get the photo as a data URL
+            const photo = canvas.toDataURL('image/jpeg');
+
+            // Save the photo to the gallery
+            const a = document.createElement('a');
+            a.href = photo;
+            a.download = 'photo.jpg';
+            a.click();
+
+            // Go back to camera view
+            document.getElementById('camera-view').style.display = 'block';
+            document.getElementById('save-option').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
